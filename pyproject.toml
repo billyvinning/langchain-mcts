@@ -14,7 +14,8 @@ dependencies = [
   "pydantic==2.9.2",
   "pydantic_core==2.23.4",
   "json_repair==0.29.2",
-  "langgraph==0.2.23"
+  "langgraph==0.2.23",
+  "graphviz==0.20.3"
 ]
 
 [project.optional-dependencies]
@@ -63,7 +64,7 @@ warn_unused_configs = true
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = []
+module = ["graphviz.*"]
 ignore_missing_imports = true
 disallow_untyped_defs = false
 
