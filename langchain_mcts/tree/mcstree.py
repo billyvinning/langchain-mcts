@@ -3,9 +3,10 @@ import random
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from functools import cached_property
-from typing import Any, Callable, Final, Generic, Self, TypeVar
+from typing import Any, Callable, Final, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict
+from typing_extensions import Self
 
 from langchain_mcts.tree import AbstractNode, AbstractTree
 
