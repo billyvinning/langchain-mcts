@@ -190,24 +190,48 @@ def test_game_mechanics():
         "UCT",
     ],
 )
-def test_next_best_move(n_rollouts, tree_policy):
-    random.seed(777)
-    mcts = NoughtsAndCrossesMCTS.from_root_state(
-        {
-            "board": (
+@pytest.mark.parametrize(
+    ("root_state_board", "expected_best_next_state"),
+    [
+        (
+            (
                 (Tile.CROSSES, Tile.CROSSES, Tile.EMPTY),
                 (Tile.EMPTY, Tile.EMPTY, Tile.NOUGHTS),
                 (Tile.EMPTY, Tile.EMPTY, Tile.EMPTY),
             ),
-        },
+            (
+                (Tile.CROSSES, Tile.CROSSES, Tile.NOUGHTS),
+                (Tile.EMPTY, Tile.EMPTY, Tile.NOUGHTS),
+                (Tile.EMPTY, Tile.EMPTY, Tile.EMPTY),
+            ),
+        ),
+        (
+            (
+                (Tile.CROSSES, Tile.CROSSES, Tile.EMPTY),
+                (Tile.CROSSES, Tile.NOUGHTS, Tile.EMPTY),
+                (Tile.NOUGHTS, Tile.EMPTY, Tile.EMPTY),
+            ),
+            (
+                (Tile.CROSSES, Tile.CROSSES, Tile.NOUGHTS),
+                (Tile.CROSSES, Tile.NOUGHTS, Tile.EMPTY),
+                (Tile.NOUGHTS, Tile.EMPTY, Tile.EMPTY),
+            ),
+        ),
+    ],
+    ids=["imminent-loss", "imminent-win"],
+)
+def test_next_best_move(
+    n_rollouts,
+    tree_policy,
+    root_state_board,
+    expected_best_next_state,
+):
+    random.seed(777)
+    mcts = NoughtsAndCrossesMCTS.from_root_state(
+        {"board": root_state_board},
         c=2 * (2**0.5),
         invert_reward=False,
         tree_policy=tree_policy,
-    )
-    expected_best_next_state = (
-        (Tile.CROSSES, Tile.CROSSES, Tile.NOUGHTS),
-        (Tile.EMPTY, Tile.EMPTY, Tile.NOUGHTS),
-        (Tile.EMPTY, Tile.EMPTY, Tile.EMPTY),
     )
     assert mcts.best_next_state(n_rollouts).board == expected_best_next_state, len(
         mcts.nodes,
