@@ -4,14 +4,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from langchain_mcts.tree.base import AbstractNode, AbstractTree
-
-
-def test_imports():
-    import langchain_mcts.tree as lib
-
-    expected_imports = {"AbstractNode", "AbstractTree"}
-    assert expected_imports.issubset(set(lib.__all__))
+from langchain_mcts.tree import AbstractNode, AbstractTree
 
 
 class Node(AbstractNode):

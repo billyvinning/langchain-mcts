@@ -7,12 +7,12 @@ import pytest
 from pydantic import Field
 from typing_extensions import Self
 
-from langchain_mcts.tree import (
+from langchain_mcts.mcts import (
     AbstractState,
     MonteCarloSearchNode,
     MonteCarloSearchTree,
+    TreePolicy,
 )
-from langchain_mcts.tree.mcstree import TreePolicy
 
 
 class Tile(str, Enum):
