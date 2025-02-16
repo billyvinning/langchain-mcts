@@ -1,3 +1,4 @@
+import random
 from collections import Counter
 from enum import Enum, auto
 from itertools import chain
@@ -190,6 +191,7 @@ def test_game_mechanics():
     ],
 )
 def test_next_best_move(n_rollouts, tree_policy):
+    random.seed(777)
     mcts = NoughtsAndCrossesMCTS.from_root_state(
         {
             "board": (
