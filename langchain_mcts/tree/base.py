@@ -22,6 +22,15 @@ class AbstractTree(BaseModel, Generic[NodeT], ABC):
 
     _ROOT_INDEX: ClassVar[int] = 0
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, AbstractTree):
+            return False
+        return (
+            self.nodes == other.nodes
+            and self.children == other.children
+            and self.parents == other.parents
+        )
+
     @classmethod
     def from_root_node(cls, node_kwargs: dict[str, Any], **kwargs) -> Self:
         out = cls(**kwargs)
@@ -38,32 +47,32 @@ class AbstractTree(BaseModel, Generic[NodeT], ABC):
         return self.nodes[self._ROOT_INDEX]
 
     @property
-    def leaves(self) -> dict[int, NodeT]:
-        idxs = set(self.nodes) - set(self.parents.values())
-        return {idx: self.nodes[idx] for idx in idxs}
+    def leaves(self) -> set[int]:
+        return set(self.nodes) - set(self.parents.values())
 
     def add_node(
         self,
         *,
-        parent: Optional[int] = None,
+        parent_ix: Optional[int] = None,
         **node_kwargs,
     ) -> int:
-        if parent is None and self.nodes:
+        if parent_ix is None and self.nodes:
             msg = "There can only be one root node."
             raise ValueError(msg)
 
-        idx = len(self.nodes)
-        self.nodes[idx] = self.create_node(**node_kwargs)
-        if parent is not None:
-            if parent not in self.nodes:
-                msg = f"Parent node ({parent}) does not exist."
-            if parent not in self.children:
-                self.children[parent] = set()
-            self.children[parent].add(idx)
-            self.parents[idx] = parent
-        return idx
+        ix = len(self.nodes)
+        if parent_ix is not None:
+            if parent_ix not in self.nodes:
+                msg = f"Parent node ({parent_ix}) does not exist."
+                raise ValueError(msg)
+            if parent_ix not in self.children:
+                self.children[parent_ix] = set()
+            self.children[parent_ix].add(ix)
+            self.parents[ix] = parent_ix
+        self.nodes[ix] = self.create_node(**node_kwargs)
+        return ix
 
-    def _get_extra_node_attrs(self, idx: int, node: NodeT) -> dict[str, Any]:  # noqa: ARG002
+    def _get_extra_node_attrs(self, ix: int, node: NodeT) -> dict[str, Any]:  # noqa: ARG002
         return {}
 
     def to_graphviz(self) -> graphviz.Digraph:
@@ -76,10 +85,10 @@ class AbstractTree(BaseModel, Generic[NodeT], ABC):
 
         dot = graphviz.Digraph()
         # Create nodes.
-        for idx, node in self.nodes.items():
-            node_attrs = node.node_attrs | self._get_extra_node_attrs(idx, node)
+        for ix, node in self.nodes.items():
+            node_attrs = node.node_attrs | self._get_extra_node_attrs(ix, node)
             node_label = _get_node_label(node_attrs)
-            dot.node(str(idx), node_label)
+            dot.node(str(ix), node_label)
         # Create edges.
         for parent, children in self.children.items():
             for child in children:

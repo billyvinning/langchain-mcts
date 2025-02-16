@@ -135,8 +135,8 @@ class MonteCarloSearchTree(AbstractTree[NodeT], Generic[NodeT, StateT]):
         return max(
             self.children[parent_ix],
             key=lambda child_ix: _tree_policy_fn(
-                child_ix=child_ix,
                 parent_ix=parent_ix,
+                child_ix=child_ix,
                 c=c,
             ),
         )
@@ -146,8 +146,8 @@ class MonteCarloSearchTree(AbstractTree[NodeT], Generic[NodeT, StateT]):
         if self.nodes[ix].is_expanded:
             return ix
         remaining_states = self.nodes[ix].remaining_states
-        selected_state = self._expansion_policy(remaining_states)
-        child_state = remaining_states.pop(selected_state)
+        selected_state_ix = self._expansion_policy(remaining_states)
+        child_state = remaining_states.pop(selected_state_ix)
         return self.add_node(parent=ix, state=child_state.model_dump())
 
     @staticmethod
