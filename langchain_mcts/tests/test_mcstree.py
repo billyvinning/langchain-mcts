@@ -12,6 +12,7 @@ from langchain_mcts.tree import (
     MonteCarloSearchNode,
     MonteCarloSearchTree,
 )
+from langchain_mcts.tree.mcstree import TreePolicy
 
 
 class Tile(str, Enum):
@@ -177,7 +178,18 @@ def test_game_mechanics():
     "n_rollouts",
     [1000],
 )
-def test_next_best_move(n_rollouts):
+@pytest.mark.parametrize(
+    "tree_policy",
+    [
+        TreePolicy.UCB,
+        TreePolicy.UCT,
+        "ucb",
+        "uct",
+        "UCB",
+        "UCT",
+    ],
+)
+def test_next_best_move(n_rollouts, tree_policy):
     mcts = NoughtsAndCrossesMCTS.from_root_state(
         {
             "board": (
@@ -188,6 +200,7 @@ def test_next_best_move(n_rollouts):
         },
         c=2 * (2**0.5),
         invert_reward=False,
+        tree_policy=tree_policy,
     )
     expected_best_next_state = (
         (Tile.CROSSES, Tile.CROSSES, Tile.NOUGHTS),
@@ -197,3 +210,6 @@ def test_next_best_move(n_rollouts):
     assert mcts.best_next_state(n_rollouts).board == expected_best_next_state, len(
         mcts.nodes,
     )
+    dot = mcts.to_graphviz()
+    assert "q: " in dot.source
+    assert "n: " in dot.source

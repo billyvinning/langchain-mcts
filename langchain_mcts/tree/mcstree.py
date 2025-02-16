@@ -5,13 +5,25 @@ from enum import Enum, auto
 from functools import cached_property
 from typing import Any, Callable, Final, Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from typing_extensions import Self
 
 from langchain_mcts.tree import AbstractNode, AbstractTree
 
 
 class TreePolicy(str, Enum):
+    @staticmethod
+    def _generate_next_value_(name: str, *_) -> str:
+        """Defines next member value when using `enum.auto()`.
+
+        Args:
+            name (str): The name of the member.
+
+        Returns:
+            The name of the member lowered.
+        """
+        return name.lower()
+
     UCT = auto()
     UCB = auto()
 
@@ -88,6 +100,13 @@ class MonteCarloSearchTree(AbstractTree[NodeT], Generic[NodeT, StateT]):
     invert_reward: bool = False
     c: float = 2 * math.sqrt(2)
     tree_policy: TreePolicy = TreePolicy.UCB
+
+    @field_validator("tree_policy", mode="before")
+    @classmethod
+    def _validate_tree_policy(cls, tree_policy: str | TreePolicy) -> TreePolicy:
+        if isinstance(tree_policy, str) and not isinstance(tree_policy, TreePolicy):
+            return TreePolicy[tree_policy.upper()]
+        return tree_policy
 
     @classmethod
     def from_root_state(cls, state_kwargs: dict[str, Any], **kwargs) -> Self:

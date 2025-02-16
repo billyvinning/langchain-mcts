@@ -83,5 +83,6 @@ omit = ["langchain_mcts/tests/**", "langchain_mcts/cli/**"]
 exclude_lines = [
   "pragma: not covered",
   "@overload",
-  "class .*\\bProtocol\\):"
+  "class .*\\bProtocol\\):",
+  "pass"
 ]
