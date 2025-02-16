@@ -173,21 +173,20 @@ def test_game_mechanics():
     assert game.state() is GameState.NOUGHTS_WON
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "n_rollouts",
-    [100],
+    [1000],
 )
 def test_next_best_move(n_rollouts):
     mcts = NoughtsAndCrossesMCTS.from_root_state(
         {
-            "board": [
-                [Tile.CROSSES, Tile.CROSSES, Tile.EMPTY],
-                [Tile.EMPTY, Tile.EMPTY, Tile.NOUGHTS],
-                [Tile.EMPTY, Tile.EMPTY, Tile.EMPTY],
-            ],
+            "board": (
+                (Tile.CROSSES, Tile.CROSSES, Tile.EMPTY),
+                (Tile.EMPTY, Tile.EMPTY, Tile.NOUGHTS),
+                (Tile.EMPTY, Tile.EMPTY, Tile.EMPTY),
+            ),
         },
-        c=2**0.5,
+        c=2 * (2**0.5),
         invert_reward=False,
     )
     expected_best_next_state = (
@@ -195,4 +194,6 @@ def test_next_best_move(n_rollouts):
         (Tile.EMPTY, Tile.EMPTY, Tile.NOUGHTS),
         (Tile.EMPTY, Tile.EMPTY, Tile.EMPTY),
     )
-    assert mcts.best_next_state(n_rollouts).board == expected_best_next_state
+    assert mcts.best_next_state(n_rollouts).board == expected_best_next_state, len(
+        mcts.nodes,
+    )

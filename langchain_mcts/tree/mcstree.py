@@ -86,7 +86,7 @@ NodeT = TypeVar("NodeT", bound=MonteCarloSearchNode)
 
 class MonteCarloSearchTree(AbstractTree[NodeT], Generic[NodeT, StateT]):
     invert_reward: bool = False
-    c: float = math.sqrt(2)
+    c: float = 2 * math.sqrt(2)
     tree_policy: TreePolicy = TreePolicy.UCB
 
     @classmethod
@@ -132,8 +132,14 @@ class MonteCarloSearchTree(AbstractTree[NodeT], Generic[NodeT, StateT]):
 
             return _TREE_POLICY_FNS[self.tree_policy](q, n, n_parent, c)
 
+        # In the cases of draws in score, max will always select the first
+        # encountered, randomly shuffling the choices gets rid of any
+        # bias induces by the ordering.
+        children = list(self.children[parent_ix])
+        random.shuffle(children)
+
         return max(
-            self.children[parent_ix],
+            children,
             key=lambda child_ix: _tree_policy_fn(
                 parent_ix=parent_ix,
                 child_ix=child_ix,
@@ -148,7 +154,7 @@ class MonteCarloSearchTree(AbstractTree[NodeT], Generic[NodeT, StateT]):
         remaining_states = self.nodes[ix].remaining_states
         selected_state_ix = self._expansion_policy(remaining_states)
         child_state = remaining_states.pop(selected_state_ix)
-        return self.add_node(parent=ix, state=child_state.model_dump())
+        return self.add_node(parent_ix=ix, state=child_state.model_dump())
 
     @staticmethod
     def _expansion_policy(states: list[StateT]) -> int:
@@ -177,10 +183,10 @@ class MonteCarloSearchTree(AbstractTree[NodeT], Generic[NodeT, StateT]):
             self._backpropagate(parent_ix, reward)
 
     def step(self) -> None:
-        parent_node_ix = self._select()
-        child_node_ix = self._expand(parent_node_ix)
-        reward = self._simulate(child_node_ix)
-        self._backpropagate(child_node_ix, reward)
+        parent_ix = self._select()
+        child_ix = self._expand(parent_ix)
+        reward = self._simulate(child_ix)
+        self._backpropagate(child_ix, reward)
 
     def best_next_state(self, max_leaves: int) -> StateT:
         for _ in range(max_leaves):
