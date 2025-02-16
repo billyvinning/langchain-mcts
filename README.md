@@ -25,7 +25,13 @@
 </p>
 
 
+> [!NOTE]
+> This package is a work-in-progress!
+
+
 An implementation of Monte Carlo Tree Search with Self-Refine (MCTS-SR) in LangGraph, reproducing MathBlackBox.
+
+
 
 ## Installation
 
@@ -41,18 +47,6 @@ Alternatively, install from a local clone with `pip` via:
 git clone git@github.com:billyvinning/langchain-mcts.git
 cd langchain-mcts
 pip install .
-```
-
-
-## Usage
-
-
-Firstly, initialise your favourite LLM; this example uses Gemini 1.5 Flash from Google's Vertex AI.
-
-```python
-from langchain_google_vertexai import ChatVertexAI
-
-llm = ChatVertexAI(model_name="gemini-1.5-flash")
 ```
 
 
